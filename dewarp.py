@@ -1,4 +1,5 @@
 import cv2
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -33,7 +34,7 @@ def dewarp_text(input_path, output_path, n_splines = 5):
     plt.show()
 
     # Roll each column to align the text
-    for i in range(image.shape[1] + 1):
+    for i in range(image.shape[1]):
         image[:, i, 0] = np.roll(image[:, i, 0], round(y_hat[i] - thresh.shape[0]/2))
         image[:, i, 1] = np.roll(image[:, i, 1], round(y_hat[i] - thresh.shape[0]/2))
         image[:, i, 2] = np.roll(image[:, i, 2], round(y_hat[i] - thresh.shape[0]/2))
@@ -44,11 +45,15 @@ def dewarp_text(input_path, output_path, n_splines = 5):
     plt.subplots_adjust(bottom = 0, left = 0, right = 1, top = 1)
     plt.show()
     
+    if os.path.isdir(output_path):
+    # Nếu output_path chỉ là thư mục, tự động gán thêm tên file
+        output_path = os.path.join(output_path, "output.png")
     # Save image to desired directory
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     cv2.imwrite(output_path, image)
 
 if __name__ == "__main__":
     
-    input_path = sys.argv[1]
-    output_path = sys.argv[2]
+    input_path = r"D:\Git\curved-text-alignment\images\new1.png"
+    output_path = r"D:\Git\curved-text-alignment\result\new1_output.png"
     dewarp_text(input_path, output_path)

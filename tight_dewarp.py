@@ -50,6 +50,6 @@ def uncurve_text(input_path, output_path, n_splines = 5):
 
 if __name__ == "__main__":
     
-    input_path = sys.argv[1]
-    output_path = sys.argv[2]
+    input_path = r'D:\Git\curved-text-alignment\images\tv.png'
+    output_path =r'D:\Git\curved-text-alignment\result\tv1_output.png'
     uncurve_text(input_path, output_path)

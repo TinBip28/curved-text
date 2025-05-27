@@ -1,113 +1,67 @@
-# Text Line Dewarping
+# Công Cụ Chỉnh Sửa Văn Bản Cong
 
-## Dependencies
+Công cụ này giúp bạn làm thẳng và căn chỉnh văn bản cong trong hình ảnh. Nó sử dụng quy trình hai giai đoạn để phát hiện và chỉnh sửa các dòng văn bản cong.
 
-```shell
-pip3 install -r requirements.txt
+## Tính Năng
+
+- Tải lên hình ảnh của bạn hoặc sử dụng hình ảnh mẫu
+- Điều chỉnh các thông số thuật toán để có kết quả tối ưu
+- Quy trình làm thẳng văn bản hai giai đoạn
+- Hiển thị tương tác của quá trình căn chỉnh
+- Tải xuống hình ảnh đã xử lý
+
+## Cài Đặt
+
+1. Clone repository này:
+```
+git clone https://github.com/yourusername/curved-text-alignment.git
+cd curved-text-alignment
 ```
 
-NOTE: If you are using `pyenv` to install older versions of Python, you might need to install development versions of `libsqlite3x`, `ncurses`, `readline`, and `tkinter`. For example, on Fedora: `dnf install libsq3-devel ncurses-devel readline-devel tk-devel`.
-
-## Running
-
-### To process the entire image
-
-Run the `dewarp.py` script :
-
-```shell
-python ./dewarp.py ./sample.png ./output.png
+2. Cài đặt các thư viện cần thiết:
+```
+pip install -r requirements.txt
 ```
 
-### To process the image only where there's text
+## Cách Sử Dụng
 
-Run the `tight_dewarp.py` script :
-
-```shell
-python ./tight_dewarp.py ./sample.png ./output.png
+1. Khởi động ứng dụng Streamlit:
+```
+streamlit run app.py
 ```
 
-Both functions exhibit comparable performance, with no discernible advantage in either. The primary distinction lies in their operational scope: `dewarp.py` operates across the entire image, whereas `tight_dewarp.py` specifically tracks the leftmost and rightmost black pixels within Otsu's threshold image, concentrating its efforts within that identified range.
+2. Mở trình duyệt web của bạn và truy cập http://localhost:8501
 
-## Steps
+3. Tải lên một hình ảnh hoặc chọn một hình ảnh mẫu
 
-1) Load Image :
+4. Điều chỉnh các thông số khi cần:
+   - Số đường cong spline: Điều khiển mức độ thuật toán bám sát đường cong
+   - Chuẩn hóa chiều dài cung: Làm cho việc lấy mẫu dọc theo đường cong đồng đều hơn
 
-![Original image](./images/sample.png?raw=true)
+5. Nhấp "Xử Lý Hình Ảnh" để bắt đầu căn chỉnh
 
-2) Convert from RGB to Grayscale :
+6. Xem kết quả và tải xuống hình ảnh đã xử lý
 
-![Output image](./images/gray.png?raw=true)
+## Cách Hoạt Động
 
-3) Apply Otsu's Thresholding Method, Erosion and then Dilation :
+Quá trình căn chỉnh văn bản gồm hai giai đoạn chính:
 
-![Original image](./images/otsu.png?raw=true)
+1. **Giai Đoạn 1 (Dewarp Chặt)**:
+   - Phát hiện các điểm ảnh đen trong hình
+   - Khớp đường cong với các điểm ảnh này
+   - Lấy mẫu vuông góc với đường cong này để tạo ra dòng văn bản thẳng
 
-4) Calculate curve using Generalized Additive Model :
+2. **Giai Đoạn 2 (Căn Chỉnh Cuối Cùng)**:
+   - Lấy đầu ra từ giai đoạn đầu tiên
+   - Thực hiện các điều chỉnh bổ sung bằng cách cuộn các cột hình ảnh
+   - Tạo ra văn bản đã căn chỉnh cuối cùng
 
-![Output image](./images/poly.png?raw=true)
+## Thông Số
 
-5) Final Image :
+- **Thông Số Giai Đoạn 1**:
+  - Số đường cong spline: Giá trị cao hơn sẽ bám sát đường cong hơn nhưng có thể ít mượt mà
+  - Chuẩn hóa chiều dài cung: Đảm bảo lấy mẫu đồng đều dọc theo đường cong
 
-![Output image](./images/output.png?raw=true)
-
-## Greek Text Example
-
-1) Input Image :
-
-![Output image](./images/greek_input.png?raw=true)
-
-2) Output Image :
-
-![Output image](./images/greek_output.png?raw=true)
-
-## Rectification
-
-1) Input Image :
-
-![Output image](./images/fig2.png?raw=true)
-
-2) Semi-processed Image :
-
-![Output image](./images/fig2-semi.png?raw=true)
-
-3) Output Image :
-
-![Output image](./images/fig2-final.png?raw=true)
-
-The rectification dataset can be viewed and downloaded through this [link](https://mega.nz/folder/CQJhEQqB#J4IrsiatBhKXYn14K9IzMQ).
-
-## Results and Performance
-
-The number of splines used for the initial curve estimation is 8, and the number of splines used for the final alignment is 12.
-
-| Warping Function   |    DW    | Word Error Rate w/o Rectification | Character Error Rate w/o Rectification | Word Error Rate w/ Rectification | Character Error Rate w/ Rectification |
-|:------------------:|:--------:|:---------------------------------:|:-------------------------------------:|:---------------------------------:|:-------------------------------------:|
-| y = -x             | 99.86% |              0.9440              |                0.5063                 |              0.1552              |                0.0237                 |
-| y = x<sup>2</sup>  | 99.86% |              1.3352              |                0.8339                 |              0.3973              |                0.0620                 |
-| y = -x<sup>3</sup> | 99.88% |              1.1067              |                0.6613                 |              0.1838              |                0.0318                 |
-| y = x<sup>4</sup>  | 99.92% |              1.7962              |                0.7910                 |              0.3772              |                0.0575                 |
-
-Suppose we aim to improve performance for the y = x<sup>2</sup> scenario by identifying an optimal set of numbers. Below is the variation in CER and WER scores based on the number of splines used:
-
-![cer](https://github.com/user-attachments/assets/6eac36a7-8b57-44eb-82c7-22911672cfd2)
-
-![wer](https://github.com/user-attachments/assets/e2ec37df-f70c-4833-b111-d542cb5232c0)
-
-## Citation
-
-If you have found value in this repository, we kindly request that you consider citing it as a source of reference:
-
-Stogiannopoulos, Thomas. “Curved Line Text Alignment: A Function That Takes as Input a Cropped Text Line Image, and Outputs the Dewarped Image.”
-GitHub, December 1, 2022. https://github.com/TomStog/curved-text-alignment.
-
-For more information, you can also check my paper "Curved Text Line Rectification via Bresenham’s Algorithm and Generalized Additive Models" [here](https://doi.org/10.3390/signals5040039).
-
-```
-@article{Stogiannopoulos2024CurvedTL,
-  title={Curved Text Line Rectification via Bresenham’s Algorithm and Generalized Additive Models},
-  author={Thomas Stogiannopoulos and Ilias Theodorakopoulos},
-  journal={Signals},
-  year={2024},
-  url={https://api.semanticscholar.org/CorpusID:273595704}
-}
-```
+- **Thông Số Giai Đoạn 2**:
+  - Số đường cong spline: Tinh chỉnh căn chỉnh cuối cùng
+  - Chuẩn hóa chiều dài cung: Điều chỉnh việc lấy mẫu cho căn chỉnh cuối cùng
