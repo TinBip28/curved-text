@@ -4,7 +4,7 @@ from pygam import LinearGAM
 from scipy.integrate import trapz
 import os
 
-def get_curve_integral(image_path, n_splines=8):
+def get_curve_integral(image_path, n_splines=6):
     """
     Ước tính đường cong trung tâm của văn bản trong ảnh và tính tích phân
     của độ lệch tuyệt đối của đường cong so với đường trung bình của nó.
