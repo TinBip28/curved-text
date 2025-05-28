@@ -18,7 +18,6 @@ st.set_page_config(
 # App title and description
 st.title("Công Cụ Chỉnh Sửa Văn Bản Cong")
 st.markdown("Công cụ này giúp bạn làm thẳng và căn chỉnh văn bản cong trong hình ảnh.")
-
 # Sidebar for parameters
 st.sidebar.header("Thông Số")
 
@@ -32,13 +31,21 @@ image_source = st.sidebar.radio(
 if image_source == "Tải Hình Ảnh Lên":
     uploaded_file = st.sidebar.file_uploader("Tải lên một hình ảnh", type=["jpg", "jpeg", "png"])
     if uploaded_file is not None:
-        # Save the uploaded file to a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
-            tmp_file.write(uploaded_file.getvalue())
-            input_path = tmp_file.name
+        # Create images directory if it doesn't exist
+        image_dir = "images"
+        os.makedirs(image_dir, exist_ok=True)
+        
+        # Save the uploaded file to the images directory
+        uploaded_filename = uploaded_file.name
+        input_path = os.path.join(image_dir, uploaded_filename)
+        
+        # Write the uploaded file to the images directory
+        with open(input_path, "wb") as f:
+            f.write(uploaded_file.getvalue())
         
         # Display the uploaded image
         st.sidebar.image(uploaded_file, caption="Hình Ảnh Đã Tải Lên", use_column_width=True)
+        st.sidebar.success(f"📁 Đã lưu vào: `{input_path}`")
     else:
         st.warning("Vui lòng tải lên một hình ảnh để bắt đầu.")
         st.stop()
@@ -97,9 +104,31 @@ if process_button:
             first_stage_figures = uncurve_text_tight(input_path, intermediate_path, n1_splines, arc_equal=arc_equal_tight, return_figures=True)
             
             # Second stage processing (uncurve_text)
-            st.text("Đang chạy xử lý giai đoạn 2...")
+            st.text("Đang chạy xử lý giai đoạn 2...")            
             second_stage_figures = uncurve_text(intermediate_path, final_path, n2_splines, arc_equal=arc_equal_final, return_figures=True)
-              # Display the results
+            
+            # Determine output filenames based on input source
+            if image_source == "Tải Hình Ảnh Lên":
+                base_name = os.path.splitext(uploaded_file.name)[0]
+            else:
+                base_name = os.path.splitext(selected_image)[0]
+            
+            # Create result directory if it doesn't exist
+            result_dir = "result"
+            os.makedirs(result_dir, exist_ok=True)
+            
+            # Define output paths in result directory
+            intermediate_result_path = os.path.join(result_dir, f"{base_name}_output.png")
+            final_result_path = os.path.join(result_dir, f"{base_name}_final.png")
+            
+            # Save results to result directory
+            intermediate_image = cv2.imread(intermediate_path)
+            cv2.imwrite(intermediate_result_path, intermediate_image)
+            
+            final_image = cv2.imread(final_path)
+            cv2.imwrite(final_result_path, final_image)
+            
+            # Display the results
             with result_container:
                 st.subheader("Kết Quả Xử Lý")
                 
@@ -129,36 +158,16 @@ if process_button:
                 
                 # Final result
                 st.markdown("### Kết Quả Cuối Cùng")
-                final_image = cv2.imread(final_path)
                 final_image_rgb = cv2.cvtColor(final_image, cv2.COLOR_BGR2RGB)
                 st.image(final_image_rgb, caption="Văn Bản Đã Được Căn Chỉnh")
-                
-                # Download buttons
-                col1, col2 = st.columns(2)
-                with col1:
-                    # Create a BytesIO object for the intermediate result
-                    buf_intermediate = BytesIO()
-                    Image.fromarray(cv2.cvtColor(cv2.imread(intermediate_path), cv2.COLOR_BGR2RGB)).save(buf_intermediate, format="PNG")
-                    buf_intermediate.seek(0)
-                    st.download_button(
-                        label="Tải Kết Quả Trung Gian",
-                        data=buf_intermediate,
-                        file_name="ket_qua_trung_gian.png",
-                        mime="image/png"
-                    )
-                
-                with col2:
-                    # Create a BytesIO object for the final result
-                    buf_final = BytesIO()
-                    Image.fromarray(cv2.cvtColor(final_image, cv2.COLOR_BGR2RGB)).save(buf_final, format="PNG")
-                    buf_final.seek(0)
-                    st.download_button(
-                        label="Tải Kết Quả Cuối Cùng",
-                        data=buf_final,
-                        file_name="ket_qua_cuoi_cung.png",
-                        mime="image/png"
-                    )
-                  # Clean up
+             
+            
+            try:
+                os.unlink(intermediate_path)
+                os.unlink(final_path)
+                # No need to delete uploaded images as they are saved in images/ folder
+            except:
+                pass  # Ignore cleanup errors
             plt.close('all')
             
         except Exception as e:
@@ -167,7 +176,5 @@ if process_button:
 else:
     with result_container:
         st.info("Nhấp 'Xử Lý Hình Ảnh' để bắt đầu căn chỉnh văn bản.")
-
 # Footer
 st.markdown("---")
-st.markdown("Công Cụ Chỉnh Sửa Văn Bản Cong - Được tạo với ❤️ sử dụng Streamlit")

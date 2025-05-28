@@ -349,9 +349,9 @@ def uncurve_text(input_path, output_path, n_splines, arc_equal=False, return_fig
 
 if __name__ == "__main__":
     # Example usage
-    input_path = 'images/new1.png'
-    output_path = 'result/new1_output.png'
-    final_path = 'result/new1_finnal.png'
+    input_path = 'images/HUS1.png'
+    output_path = 'result/HUS1_output.png'
+    final_path = 'result/HUS1_final.png'
     n1_splines = 6
     n2_splines = 9
     uncurve_text_tight(input_path, output_path, n1_splines, arc_equal=True)
